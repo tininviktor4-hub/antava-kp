@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Паспорт закупки и коммерческое предложение</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <section class="auth-screen" id="authScreen" hidden>
+    <div class="auth-card">
+      <img src="assets/antava-logo.png" alt="АНТАВА" class="auth-logo">
+      <p class="eyebrow">Общая база документов</p>
+      <h2>Вход для сотрудников</h2>
+      <p class="auth-description">Войдите, чтобы работать с общей историей и базой получателей.</p>
+      <label>Электронная почта<input id="authEmail" type="email" autocomplete="email" placeholder="name@antava-trade.ru"></label>
+      <label>Пароль<input id="authPassword" type="password" autocomplete="current-password" placeholder="Не менее 6 символов"></label>
+      <p class="auth-message" id="authMessage" aria-live="polite"></p>
+      <div class="auth-actions">
+        <button class="button button-primary" id="signInButton">Войти</button>
+        <button class="button button-ghost" id="signUpButton">Создать аккаунт</button>
+      </div>
+    </div>
+  </section>
+  <header class="app-header">
+    <div class="app-header-brand">
+      <div class="app-logo-wrap">
+        <img class="app-logo" src="assets/antava-logo.png" alt="АНТАВА">
+      </div>
+      <div>
+        <p class="eyebrow">Подготовка коммерческого предложения</p>
+        <h1>Конструктор КП</h1>
+        <p class="muted">Заполните позиции заявки и сформируйте готовое предложение по шаблону.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="cloud-user" id="cloudUser" hidden></span>
+      <button class="button button-ghost" id="signOutButton" hidden>Выйти</button>
+      <button class="button button-ghost" id="newProposalButton">+ Новое КП</button>
+      <button class="button button-ghost" id="newLetterButton">+ Новое письмо</button>
+      <button class="button button-ghost" id="saveButton">Сохранить в историю</button>
+      <button class="button button-ghost" id="excelButton">Сохранить в Excel</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <nav class="tabs" aria-label="Разделы программы">
+      <button class="tab active" data-tab="calculation">Позиции заявки</button>
+      <button class="tab" data-tab="proposal">Предварительный просмотр</button>
+      <button class="tab" data-tab="history">История</button>
+    </nav>
+
+    <section id="calculation" class="tab-panel active">
+      <div class="settings-grid single-settings">
+        <article class="card">
+          <p class="eyebrow">Реквизиты предложения</p>
+          <h2 id="detailsTitle">Данные коммерческого предложения</h2>
+          <div class="details-sections">
+            <section class="details-section">
+              <div class="details-section-heading">
+                <span class="details-section-number">1</span>
+                <div><h3>Получатель</h3><p>Кому адресовано коммерческое предложение</p></div>
+              </div>
+              <div class="form-grid">
+                <label class="form-grid-full">Выбрать получателя из базы
+                  <select id="recipientDatabaseSelect">
+                    <option value="">Новый получатель</option>
+                  </select>
+                </label>
+                <label>Организация получателя<input id="customer" placeholder="ООО «Заказчик»"></label>
+                <label>Должность получателя<input id="recipientPosition" placeholder="Генеральному директору"></label>
+                <label>ФИО получателя<input id="recipientName" placeholder="Иванову Ивану Ивановичу"></label>
+                <label>Адрес получателя<input id="recipientAddress" placeholder="Индекс, город, улица, дом"></label>
+              </div>
+            </section>
+            <section class="details-section">
+              <div class="details-section-heading">
+                <span class="details-section-number">2</span>
+                <div><h3>Документ</h3><p>Номер, дата и связь с запросом заказчика</p></div>
+              </div>
+              <div class="form-grid">
+                <label><span id="documentDateLabel">Дата КП</span><input id="proposalDate" type="date"></label>
+                <label>Исходящий номер<input id="proposalNumber" value="КП-001"></label>
+                <label>В ответ на №<input id="replyNumber" placeholder="Необязательно"></label>
+                <label>Дата входящего письма<input id="replyDate" type="date"></label>
+              </div>
+            </section>
+            <section class="details-section" id="commercialConditionsSection">
+              <div class="details-section-heading">
+                <span class="details-section-number">3</span>
+                <div><h3>Коммерческие условия</h3><p>Налоговая ставка предложения</p></div>
+              </div>
+              <div class="form-grid">
+                <label>НДС, %<input id="vatRate" type="number" min="0" step="0.1" value="22"></label>
+              </div>
+            </section>
+            <section class="details-section">
+              <div class="details-section-heading">
+                <span class="details-section-number">4</span>
+                <div><h3>Подписант</h3><p>Ответственное лицо со стороны поставщика</p></div>
+              </div>
+              <div class="form-grid">
+                <label>Должность подписанта<input id="signatoryPosition" value="Генеральный директор"></label>
+                <label>ФИО подписанта<input id="signatoryName" value="Батурина Татьяна Алексеевна"></label>
+              </div>
+            </section>
+            <section class="details-section details-section-wide">
+              <div class="details-section-heading">
+                <span class="details-section-number">5</span>
+                <div><h3>Исполнитель</h3><p>Контактные данные сотрудника, подготовившего предложение</p></div>
+              </div>
+              <div class="form-grid executor-form-grid">
+                <label>ФИО исполнителя
+                  <select id="executorName">
+                    <option value="">Не выбран</option>
+                    <option value="Тинин Виктор Сергеевич">Тинин Виктор Сергеевич</option>
+                    <option value="Хатух Тимур Бибарсович">Хатух Тимур Бибарсович</option>
+                    <option value="Самойлова Полина Вадимовна">Самойлова Полина Вадимовна</option>
+                  </select>
+                </label>
+                <label>Телефон<input id="executorPhone" value="8 (495) 740-30-77"></label>
+                <label>Добавочный<input id="executorExtension" placeholder="Не указан"></label>
+                <label>Электронная почта<input id="executorEmail" type="email" value="contact@antava-trade.ru"></label>
+              </div>
+            </section>
+            <section class="details-section details-section-wide">
+              <div class="details-section-heading">
+                <span class="details-section-number">6</span>
+                <div><h3>Свободный текст</h3><p id="freeTextDescription">Дополнительная информация до и после таблицы с позициями</p></div>
+              </div>
+              <div class="form-grid free-text-grid">
+                <div class="rich-field">
+                  <span class="rich-field-label" id="preTableLabel">Текст перед таблицей</span>
+                  <div class="rich-toolbar" data-editor="preTableEditor">
+                    <button type="button" data-command="bold" title="Жирный"><b>Ж</b></button>
+                    <button type="button" data-command="italic" title="Курсив"><i>К</i></button>
+                    <button type="button" data-command="underline" title="Подчёркнутый"><u>Ч</u></button>
+                    <span class="toolbar-separator"></span>
+                    <button type="button" data-command="justifyLeft" title="По левому краю">≡</button>
+                    <button type="button" data-command="justifyCenter" title="По центру">≡</button>
+                    <button type="button" data-command="justifyRight" title="По правому краю">≡</button>
+                    <button type="button" data-command="justifyFull" title="По ширине">☰</button>
+                    <span class="toolbar-separator"></span>
+                    <button type="button" data-command="insertUnorderedList" title="Маркированный список">• Список</button>
+                    <button type="button" data-command="insertOrderedList" title="Нумерованный список">1. Список</button>
+                  </div>
+                  <div id="preTableEditor" class="rich-editor" contenteditable="true" data-placeholder="Введите текст перед таблицей"></div>
+                  <textarea id="preTableText" class="rich-storage" tabindex="-1" aria-hidden="true"></textarea>
+                </div>
+                <div class="rich-field" id="postTableField">
+                  <span class="rich-field-label">Текст после таблицы</span>
+                  <div class="rich-toolbar" data-editor="postTableEditor">
+                    <button type="button" data-command="bold" title="Жирный"><b>Ж</b></button>
+                    <button type="button" data-command="italic" title="Курсив"><i>К</i></button>
+                    <button type="button" data-command="underline" title="Подчёркнутый"><u>Ч</u></button>
+                    <span class="toolbar-separator"></span>
+                    <button type="button" data-command="justifyLeft" title="По левому краю">≡</button>
+                    <button type="button" data-command="justifyCenter" title="По центру">≡</button>
+                    <button type="button" data-command="justifyRight" title="По правому краю">≡</button>
+                    <button type="button" data-command="justifyFull" title="По ширине">☰</button>
+                    <span class="toolbar-separator"></span>
+                    <button type="button" data-command="insertUnorderedList" title="Маркированный список">• Список</button>
+                    <button type="button" data-command="insertOrderedList" title="Нумерованный список">1. Список</button>
+                  </div>
+                  <div id="postTableEditor" class="rich-editor" contenteditable="true" data-placeholder="Введите текст после итоговой суммы"></div>
+                  <textarea id="postTableText" class="rich-storage" tabindex="-1" aria-hidden="true"></textarea>
+                </div>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+
+      <article class="card table-card" id="nomenclatureSection">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Номенклатура</p>
+            <h2>Позиции заявки</h2>
+            <p class="table-hint">Можно копировать из Excel целые столбцы или диапазоны: выберите первую ячейку и нажмите <kbd>Ctrl</kbd> + <kbd>V</kbd>.</p>
+          </div>
+          <div class="inline-actions">
+            <button class="button button-ghost" id="columnsButton">Настроить столбцы</button>
+            <button class="button button-secondary" id="addRowButton">+ Добавить позицию</button>
+          </div>
+        </div>
+        <div class="columns-panel" id="columnsPanel" hidden>
+          <div class="columns-panel-head">
+            <div>
+              <strong>Настройка столбцов</strong>
+              <p>Меняйте названия и порядок, выбирайте тип данных и отмечайте столбцы для вывода в КП.</p>
+            </div>
+            <button class="button button-secondary" id="addColumnButton">+ Добавить столбец</button>
+          </div>
+          <div id="columnsList" class="columns-list"></div>
+        </div>
+        <div class="table-wrap">
+          <table id="itemsTable">
+            <thead><tr></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+
+      <section class="summary-grid" id="summarySection">
+        <article class="metric"><span>Продажа без НДС</span><strong id="saleSubtotal">0 ₽</strong></article>
+        <article class="metric"><span>НДС</span><strong id="vatTotal">0 ₽</strong></article>
+        <article class="metric metric-accent"><span>Итого с НДС</span><strong id="grandTotal">0 ₽</strong></article>
+      </section>
+    </section>
+
+    <section id="proposal" class="tab-panel">
+      <div class="proposal-toolbar">
+        <div>
+          <p class="eyebrow">Предпросмотр документа</p>
+          <h2>Коммерческое предложение</h2>
+        </div>
+        <div class="inline-actions">
+          <button class="button button-ghost" id="backButton">Вернуться к расчёту</button>
+          <button class="button button-secondary" id="proposalExcelButton">Сохранить в Excel</button>
+          <button class="button button-secondary" id="printButton">Отправить на печать</button>
+          <button class="button button-primary" id="pdfButton">Сохранить в PDF</button>
+        </div>
+      </div>
+      <p class="export-hint" id="exportHint" aria-live="polite"></p>
+      <article id="proposalDocument" class="proposal-document"></article>
+    </section>
+
+    <section id="history" class="tab-panel">
+      <article class="card history-card">
+        <div class="card-heading">
+          <div>
+            <p class="eyebrow">Сохранённые документы</p>
+            <h2>История коммерческих предложений</h2>
+            <p class="table-hint">Записи хранятся только в этом браузере на данном компьютере.</p>
+          </div>
+        </div>
+        <div class="table-wrap history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Сохранено</th>
+                <th>Тип</th>
+                <th>Номер документа</th>
+                <th>Дата КП</th>
+                <th>Заказчик</th>
+                <th>Исполнитель</th>
+                <th>Сумма с НДС</th>
+                <th>Позиций</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state history-empty" id="historyEmpty" hidden>В истории пока нет коммерческих предложений.</div>
+      </article>
+    </section>
+  </main>
+
+  <script src="assets/pdfmake.min.js"></script>
+  <script src="assets/vfs_fonts.js"></script>
+  <script src="assets/html2canvas.min.js"></script>
+  <script src="assets/supabase.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
