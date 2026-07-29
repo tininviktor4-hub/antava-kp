@@ -739,6 +739,11 @@ function renderHistory() {
     restore.className = "button button-secondary history-action-button";
     restore.textContent = "Открыть";
     restore.addEventListener("click", () => restoreProposal(record));
+    const openPdf = document.createElement("button");
+    openPdf.className = "button button-primary history-action-button";
+    openPdf.textContent = "PDF";
+    openPdf.title = "Посмотреть документ в PDF";
+    openPdf.addEventListener("click", () => openHistoryPdf(record, openPdf));
     const remove = document.createElement("button");
     remove.className = "icon-button";
     remove.title = "Удалить из истории";
@@ -754,10 +759,35 @@ function renderHistory() {
         remove.disabled = false;
       }
     });
-    actions.append(restore, remove);
+    actions.append(restore, openPdf, remove);
     row.append(actions);
     body.append(row);
   });
+}
+
+async function openHistoryPdf(record, button) {
+  const pdfWindow = window.open("", "_blank");
+  button.disabled = true;
+  try {
+    restoreProposal(record);
+    generateProposal();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const blob = await proposalPdfBlob();
+    const url = URL.createObjectURL(blob);
+    if (pdfWindow) {
+      pdfWindow.location.href = url;
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } else {
+      URL.revokeObjectURL(url);
+      alert("Браузер заблокировал открытие PDF. Разрешите всплывающие окна для этого сайта.");
+    }
+  } catch (error) {
+    if (pdfWindow) pdfWindow.close();
+    console.error(error);
+    alert("Не удалось сформировать PDF. Обновите страницу и повторите.");
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function showTab(name) {
