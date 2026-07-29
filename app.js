@@ -1318,23 +1318,6 @@ async function signIn() {
   await activateCloudSession(data.user);
 }
 
-async function signUp() {
-  const email = $("#authEmail").value.trim();
-  const password = $("#authPassword").value;
-  if (!email || password.length < 6) {
-    setAuthMessage("Укажите почту и пароль не короче 6 символов.");
-    return;
-  }
-  setAuthMessage("Создаём аккаунт…", true);
-  const { data, error } = await cloudClient.auth.signUp({ email, password });
-  if (error) {
-    setAuthMessage(error.message);
-    return;
-  }
-  if (data.session) await activateCloudSession(data.user);
-  else setAuthMessage("Проверьте почту и подтвердите регистрацию.", true);
-}
-
 async function signOut() {
   await cloudClient.auth.signOut();
   cloudReady = false;
@@ -1372,7 +1355,6 @@ $("#saveButton").addEventListener("click", save);
 $("#newProposalButton").addEventListener("click", newProposal);
 $("#newLetterButton").addEventListener("click", newLetter);
 $("#signInButton").addEventListener("click", signIn);
-$("#signUpButton").addEventListener("click", signUp);
 $("#signOutButton").addEventListener("click", signOut);
 $("#authPassword").addEventListener("keydown", event => {
   if (event.key === "Enter") signIn();
