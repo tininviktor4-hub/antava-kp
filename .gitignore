@@ -1,3 +1,4 @@
 .codex-tmp/
 tmp/
+dist/
 supabase-config.example.js
