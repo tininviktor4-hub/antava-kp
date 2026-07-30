@@ -62,11 +62,14 @@
                 <div><h3>Получатель</h3><p>Кому адресовано коммерческое предложение</p></div>
               </div>
               <div class="form-grid">
-                <label class="form-grid-full">Выбрать получателя из базы
-                  <select id="recipientDatabaseSelect">
-                    <option value="">Новый получатель</option>
-                  </select>
-                </label>
+                <div class="form-grid-full recipient-database-field">
+                  <label>Выбрать получателя из базы
+                    <select id="recipientDatabaseSelect">
+                      <option value="">Новый получатель</option>
+                    </select>
+                  </label>
+                  <button class="button button-ghost" id="deleteRecipientButton" type="button" disabled>Удалить получателя</button>
+                </div>
                 <label>Организация получателя<input id="customer" placeholder="ООО «Заказчик»"></label>
                 <label>Должность получателя<input id="recipientPosition" placeholder="Генеральному директору"></label>
                 <label>ФИО получателя<input id="recipientName" placeholder="Иванову Ивану Ивановичу"></label>

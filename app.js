@@ -507,7 +507,7 @@ async function saveRecipientToDatabase() {
   renderRecipientDatabase();
   if (cloudReady) {
     const normalizedKey = `${normalizedCustomer}|${normalizedName}`;
-    const { error } = await cloudClient.from("recipients").upsert({
+    const { data, error } = await cloudClient.from("recipients").upsert({
       customer,
       position:recipient.position,
       recipient_name:name,
@@ -515,8 +515,15 @@ async function saveRecipientToDatabase() {
       normalized_key:normalizedKey,
       created_by:cloudUser.id,
       updated_at:new Date().toISOString()
-    }, { onConflict:"normalized_key" });
+    }, { onConflict:"normalized_key" }).select("*").single();
     if (error) throw error;
+    const cloudRecipient = cloudRecipientToLocal(data);
+    const updatedRecipients = readRecipients().filter(item =>
+      `${item.customer || ""}|${item.name || ""}`.toLocaleLowerCase("ru-RU") !== normalizedKey
+    );
+    updatedRecipients.unshift(cloudRecipient);
+    writeRecipients(updatedRecipients.slice(0, 200));
+    renderRecipientDatabase();
   }
 }
 
@@ -532,9 +539,11 @@ function renderRecipientDatabase() {
     select.append(option);
   });
   if ([...select.options].some(option => option.value === selected)) select.value = selected;
+  $("#deleteRecipientButton").disabled = !select.value;
 }
 
 function fillRecipientFromDatabase() {
+  $("#deleteRecipientButton").disabled = !$("#recipientDatabaseSelect").value;
   const recipient = readRecipients().find(item => item.id === $("#recipientDatabaseSelect").value);
   if (!recipient) return;
   $("#customer").value = recipient.customer || "";
@@ -542,6 +551,36 @@ function fillRecipientFromDatabase() {
   $("#recipientName").value = recipient.name || "";
   $("#recipientAddress").value = recipient.address || "";
   updateGreetingPlaceholder();
+}
+
+async function deleteSelectedRecipient() {
+  const select = $("#recipientDatabaseSelect");
+  const recipient = readRecipients().find(item => item.id === select.value);
+  if (!recipient) return;
+  const title = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "получателя";
+  if (!window.confirm(`Удалить ${title} из общей базы получателей?`)) return;
+  const button = $("#deleteRecipientButton");
+  button.disabled = true;
+  try {
+    if (cloudReady) {
+      let query = cloudClient.from("recipients").delete();
+      if (/^[0-9a-f-]{36}$/i.test(String(recipient.id))) {
+        query = query.eq("id", recipient.id);
+      } else {
+        const normalizedKey = `${recipient.customer || ""}|${recipient.name || ""}`.toLocaleLowerCase("ru-RU");
+        query = query.eq("normalized_key", normalizedKey);
+      }
+      const { error } = await query;
+      if (error) throw error;
+    }
+    writeRecipients(readRecipients().filter(item => item.id !== recipient.id));
+    select.value = "";
+    renderRecipientDatabase();
+  } catch (error) {
+    console.error(error);
+    button.disabled = false;
+    alert("Не удалось удалить получателя. Обновите страницу и повторите.");
+  }
 }
 
 async function addHistoryRecord() {
@@ -649,6 +688,7 @@ function resetDocument(type) {
   $("#proposalDocument").innerHTML = "";
   $("#exportHint").textContent = "";
   $("#recipientDatabaseSelect").value = "";
+  $("#deleteRecipientButton").disabled = true;
   updateGreetingPlaceholder();
   applyDocumentTypeUI();
   showTab("calculation");
@@ -1417,6 +1457,7 @@ formFields.forEach(id => $(`#${id}`).addEventListener("input", updateSummary));
 $("#recipientName").addEventListener("input", updateGreetingPlaceholder);
 $("#executorName").addEventListener("change", updateExecutorExtension);
 $("#recipientDatabaseSelect").addEventListener("change", fillRecipientFromDatabase);
+$("#deleteRecipientButton").addEventListener("click", deleteSelectedRecipient);
 $$(".rich-editor").forEach(editor => {
   editor.addEventListener("input", () => syncRichEditor(editor));
 });
