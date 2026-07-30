@@ -539,11 +539,10 @@ function renderRecipientDatabase() {
     select.append(option);
   });
   if ([...select.options].some(option => option.value === selected)) select.value = selected;
-  $("#deleteRecipientButton").disabled = !select.value;
+  $("#deleteRecipientButton").disabled = readRecipients().length === 0;
 }
 
 function fillRecipientFromDatabase() {
-  $("#deleteRecipientButton").disabled = !$("#recipientDatabaseSelect").value;
   const recipient = readRecipients().find(item => item.id === $("#recipientDatabaseSelect").value);
   if (!recipient) return;
   $("#customer").value = recipient.customer || "";
@@ -555,8 +554,20 @@ function fillRecipientFromDatabase() {
 
 async function deleteSelectedRecipient() {
   const select = $("#recipientDatabaseSelect");
-  const recipient = readRecipients().find(item => item.id === select.value);
-  if (!recipient) return;
+  const recipients = readRecipients();
+  let recipient = recipients.find(item => item.id === select.value);
+  if (!recipient) {
+    const customer = $("#customer").value.trim().toLocaleLowerCase("ru-RU");
+    const name = $("#recipientName").value.trim().toLocaleLowerCase("ru-RU");
+    recipient = recipients.find(item =>
+      String(item.customer || "").trim().toLocaleLowerCase("ru-RU") === customer &&
+      String(item.name || "").trim().toLocaleLowerCase("ru-RU") === name
+    );
+  }
+  if (!recipient) {
+    alert("Сначала выберите получателя из базы.");
+    return;
+  }
   const title = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "получателя";
   if (!window.confirm(`Удалить ${title} из общей базы получателей?`)) return;
   const button = $("#deleteRecipientButton");
@@ -570,11 +581,20 @@ async function deleteSelectedRecipient() {
         const normalizedKey = `${recipient.customer || ""}|${recipient.name || ""}`.toLocaleLowerCase("ru-RU");
         query = query.eq("normalized_key", normalizedKey);
       }
-      const { error } = await query;
+      const { data, error } = await query.select("id");
       if (error) throw error;
+      if (!data?.length) throw new Error("База не подтвердила удаление получателя.");
     }
     writeRecipients(readRecipients().filter(item => item.id !== recipient.id));
     select.value = "";
+    $("#customer").value = "";
+    $("#recipientPosition").value = "";
+    $("#recipientName").value = "";
+    $("#recipientAddress").value = "";
+    $("#recipientGreetingText").value = "";
+    updateGreetingPlaceholder();
+    updateSummary();
+    if (cloudReady) await loadCloudData();
     renderRecipientDatabase();
   } catch (error) {
     console.error(error);
