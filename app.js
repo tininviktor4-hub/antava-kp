@@ -1,6 +1,6 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const formFields = ["customer", "recipientPosition", "recipientName", "recipientAddress", "proposalDate", "proposalNumber", "replyNumber", "replyDate", "vatRate", "signatoryPosition", "signatoryName", "executorName", "executorPhone", "executorExtension", "executorEmail", "preTableText", "postTableText"];
+const formFields = ["customer", "recipientPosition", "recipientName", "recipientAddress", "recipientGreetingText", "proposalDate", "proposalNumber", "replyNumber", "replyDate", "vatRate", "signatoryPosition", "signatoryName", "executorName", "executorPhone", "executorExtension", "executorEmail", "preTableText", "postTableText"];
 const draftStorageKey = "commercial-proposal-builder";
 const historyStorageKey = "commercial-proposal-history";
 const recipientsStorageKey = "commercial-proposal-recipients";
@@ -541,6 +541,7 @@ function fillRecipientFromDatabase() {
   $("#recipientPosition").value = recipient.position || "";
   $("#recipientName").value = recipient.name || "";
   $("#recipientAddress").value = recipient.address || "";
+  updateGreetingPlaceholder();
 }
 
 async function addHistoryRecord() {
@@ -620,6 +621,7 @@ function resetDocument(type) {
     recipientPosition:"",
     recipientName:"",
     recipientAddress:"",
+    recipientGreetingText:"",
     proposalDate:todayInputValue(),
     proposalNumber:isLetter ? "ИСХ-001" : "КП-001",
     replyNumber:"",
@@ -647,6 +649,7 @@ function resetDocument(type) {
   $("#proposalDocument").innerHTML = "";
   $("#exportHint").textContent = "";
   $("#recipientDatabaseSelect").value = "";
+  updateGreetingPlaceholder();
   applyDocumentTypeUI();
   showTab("calculation");
 }
@@ -701,6 +704,7 @@ function restoreProposal(record) {
   updateSummary();
   syncEditorsFromState();
   updateExecutorExtension();
+  updateGreetingPlaceholder();
   applyDocumentTypeUI();
   showTab("calculation");
 }
@@ -1133,12 +1137,20 @@ function nominativeRecipientWord(word, isPatronymic = false) {
 }
 
 function recipientGreeting() {
+  const customGreeting = $("#recipientGreetingText").value.trim();
+  if (customGreeting) return customGreeting;
   const parts = $("#recipientName").value.trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return "";
   const name = nominativeRecipientWord(parts.length >= 3 ? parts[1] : parts[0]);
   const patronymic = nominativeRecipientWord(parts.length >= 3 ? parts[2] : parts[1], true);
   const female = /(?:овна|евна|ична)$/i.test(patronymic);
   return `${female ? "Уважаемая" : "Уважаемый"} ${[name, patronymic].filter(Boolean).join(" ")}!`;
+}
+
+function updateGreetingPlaceholder() {
+  const field = $("#recipientGreetingText");
+  const automaticGreeting = recipientGreeting();
+  field.placeholder = automaticGreeting || "Введите обращение, например: Уважаемый Иван Иванович!";
 }
 
 function executorContactHtml() {
@@ -1402,6 +1414,7 @@ $$(".tab").forEach(button => button.addEventListener("click", () => {
   }
 }));
 formFields.forEach(id => $(`#${id}`).addEventListener("input", updateSummary));
+$("#recipientName").addEventListener("input", updateGreetingPlaceholder);
 $("#executorName").addEventListener("change", updateExecutorExtension);
 $("#recipientDatabaseSelect").addEventListener("change", fillRecipientFromDatabase);
 $$(".rich-editor").forEach(editor => {
@@ -1419,6 +1432,7 @@ $$(".rich-toolbar button[data-command]").forEach(button => {
 tbody.addEventListener("paste", pasteExcelRange);
 
 load();
+updateGreetingPlaceholder();
 syncEditorsFromState();
 applyDocumentTypeUI();
 if (!$("#proposalDate").value) {
