@@ -540,25 +540,12 @@ function renderRecipientDatabase() {
     select.append(option);
   });
   if ([...select.options].some(option => option.value === selected)) select.value = selected;
-  $("#deleteRecipientButton").disabled = recipients.length === 0;
-  const manager = $("#recipientManager");
-  manager.innerHTML = "";
-  recipients.forEach(recipient => {
-    const row = document.createElement("div");
-    row.className = "recipient-manager-row";
-    const name = document.createElement("span");
-    name.textContent = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "Без названия";
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "button button-ghost";
-    remove.textContent = "Удалить";
-    remove.addEventListener("click", () => deleteRecipientRecord(recipient, remove));
-    row.append(name, remove);
-    manager.append(row);
-  });
+  $("#deleteRecipientButton").disabled = !select.value;
 }
 
 function fillRecipientFromDatabase() {
+  $("#deleteRecipientButton").disabled = !$("#recipientDatabaseSelect").value;
+  $("#recipientDatabaseMessage").textContent = "";
   const recipient = readRecipients().find(item => item.id === $("#recipientDatabaseSelect").value);
   if (!recipient) return;
   $("#customer").value = recipient.customer || "";
@@ -581,7 +568,7 @@ async function deleteSelectedRecipient() {
     );
   }
   if (!recipient) {
-    $("#recipientDatabaseMessage").textContent = "Сначала выберите получателя из базы или нажмите «Удалить» напротив нужной записи ниже.";
+    $("#recipientDatabaseMessage").textContent = "Сначала выберите получателя из выпадающего списка.";
     return;
   }
   await deleteRecipientRecord(recipient, $("#deleteRecipientButton"));

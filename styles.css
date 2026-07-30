@@ -67,11 +67,6 @@ h2 { margin-bottom:18px; font-size:20px; }
 .recipient-database-field { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:end; }
 .recipient-database-field label { min-width:0; }
 .recipient-database-message { grid-column:1 / -1; min-height:18px; margin:0; color:var(--muted); font-size:12px; }
-.recipient-manager { grid-column:1 / -1; display:grid; gap:6px; }
-.recipient-manager:empty { display:none; }
-.recipient-manager-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 10px; border:1px solid var(--line); border-radius:9px; background:#f6f7f8; }
-.recipient-manager-row span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
-.recipient-manager-row button { flex:0 0 auto; padding:6px 10px; }
 .details-sections { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .details-section { padding:18px; border:1px solid var(--line); border-radius:13px; background:#f8f9fa; }
 .details-section-wide { grid-column:1 / -1; }
