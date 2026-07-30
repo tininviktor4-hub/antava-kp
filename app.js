@@ -531,15 +531,31 @@ function renderRecipientDatabase() {
   const select = $("#recipientDatabaseSelect");
   if (!select) return;
   const selected = select.value;
+  const recipients = readRecipients();
   select.innerHTML = '<option value="">Новый получатель</option>';
-  readRecipients().forEach(recipient => {
+  recipients.forEach(recipient => {
     const option = document.createElement("option");
     option.value = recipient.id;
     option.textContent = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "Без названия";
     select.append(option);
   });
   if ([...select.options].some(option => option.value === selected)) select.value = selected;
-  $("#deleteRecipientButton").disabled = readRecipients().length === 0;
+  $("#deleteRecipientButton").disabled = recipients.length === 0;
+  const manager = $("#recipientManager");
+  manager.innerHTML = "";
+  recipients.forEach(recipient => {
+    const row = document.createElement("div");
+    row.className = "recipient-manager-row";
+    const name = document.createElement("span");
+    name.textContent = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "Без названия";
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "button button-ghost";
+    remove.textContent = "Удалить";
+    remove.addEventListener("click", () => deleteRecipientRecord(recipient, remove));
+    row.append(name, remove);
+    manager.append(row);
+  });
 }
 
 function fillRecipientFromDatabase() {
@@ -565,13 +581,18 @@ async function deleteSelectedRecipient() {
     );
   }
   if (!recipient) {
-    alert("Сначала выберите получателя из базы.");
+    $("#recipientDatabaseMessage").textContent = "Сначала выберите получателя из базы или нажмите «Удалить» напротив нужной записи ниже.";
     return;
   }
+  await deleteRecipientRecord(recipient, $("#deleteRecipientButton"));
+}
+
+async function deleteRecipientRecord(recipient, button) {
   const title = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "получателя";
   if (!window.confirm(`Удалить ${title} из общей базы получателей?`)) return;
-  const button = $("#deleteRecipientButton");
   button.disabled = true;
+  const message = $("#recipientDatabaseMessage");
+  message.textContent = "Удаляем получателя из общей базы…";
   try {
     if (cloudReady) {
       let query = cloudClient.from("recipients").delete();
@@ -596,10 +617,11 @@ async function deleteSelectedRecipient() {
     updateSummary();
     if (cloudReady) await loadCloudData();
     renderRecipientDatabase();
+    message.textContent = `Получатель «${title}» удалён из общей базы.`;
   } catch (error) {
     console.error(error);
     button.disabled = false;
-    alert("Не удалось удалить получателя. Обновите страницу и повторите.");
+    message.textContent = `Не удалось удалить получателя: ${error.message || "неизвестная ошибка"}`;
   }
 }
 
