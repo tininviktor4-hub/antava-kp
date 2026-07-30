@@ -346,6 +346,10 @@ function writeRecipients(recipients) {
   localStorage.setItem(recipientsStorageKey, JSON.stringify(recipients));
 }
 
+function recipientDatabaseKey(recipient) {
+  return `${recipient?.customer || ""}|${recipient?.name || ""}`.trim().toLocaleLowerCase("ru-RU");
+}
+
 function cloudDocumentToHistory(row) {
   return {
     id:row.id,
@@ -535,7 +539,7 @@ function renderRecipientDatabase() {
   select.innerHTML = '<option value="">Новый получатель</option>';
   recipients.forEach(recipient => {
     const option = document.createElement("option");
-    option.value = recipient.id;
+    option.value = recipientDatabaseKey(recipient);
     option.textContent = [recipient.customer, recipient.name].filter(Boolean).join(" — ") || "Без названия";
     select.append(option);
   });
@@ -546,7 +550,8 @@ function renderRecipientDatabase() {
 function fillRecipientFromDatabase() {
   $("#deleteRecipientButton").disabled = !$("#recipientDatabaseSelect").value;
   $("#recipientDatabaseMessage").textContent = "";
-  const recipient = readRecipients().find(item => item.id === $("#recipientDatabaseSelect").value);
+  const selectedKey = $("#recipientDatabaseSelect").value;
+  const recipient = readRecipients().find(item => recipientDatabaseKey(item) === selectedKey);
   if (!recipient) return;
   $("#customer").value = recipient.customer || "";
   $("#recipientPosition").value = recipient.position || "";
@@ -558,7 +563,7 @@ function fillRecipientFromDatabase() {
 async function deleteSelectedRecipient() {
   const select = $("#recipientDatabaseSelect");
   const recipients = readRecipients();
-  let recipient = recipients.find(item => item.id === select.value);
+  let recipient = recipients.find(item => recipientDatabaseKey(item) === select.value);
   if (!recipient) {
     const customer = $("#customer").value.trim().toLocaleLowerCase("ru-RU");
     const name = $("#recipientName").value.trim().toLocaleLowerCase("ru-RU");
@@ -593,7 +598,8 @@ async function deleteRecipientRecord(recipient, button) {
       if (error) throw error;
       if (!data?.length) throw new Error("База не подтвердила удаление получателя.");
     }
-    writeRecipients(readRecipients().filter(item => item.id !== recipient.id));
+    const deletedKey = recipientDatabaseKey(recipient);
+    writeRecipients(readRecipients().filter(item => recipientDatabaseKey(item) !== deletedKey));
     select.value = "";
     $("#customer").value = "";
     $("#recipientPosition").value = "";
