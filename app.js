@@ -21,6 +21,20 @@ const company = {
   email: "contact@antava-trade.ru"
 };
 
+const signatoryPositions = {
+  "Батурина Т.А.":"Генеральный директор",
+  "Скребнев А.В.":"Технический директор"
+};
+
+function updateSignatoryPosition() {
+  const nameField = $("#signatoryName");
+  if (nameField.value.trim() === "Батурина Татьяна Алексеевна") {
+    nameField.value = "Батурина Т.А.";
+  }
+  const position = signatoryPositions[nameField.value.trim()];
+  if (position) $("#signatoryPosition").value = position;
+}
+
 const defaultColumns = [
   { id:"requestName", label:"Наименование по заявке", type:"text", inProposal:false, role:"requestName" },
   { id:"supplyName", label:"Наименование к поставке", type:"text", inProposal:true, role:"supplyName" },
@@ -702,7 +716,7 @@ function resetDocument(type) {
     replyDate:"",
     vatRate:"22",
     signatoryPosition:"Генеральный директор",
-    signatoryName:"Батурина Татьяна Алексеевна",
+    signatoryName:"Батурина Т.А.",
     executorName:"",
     executorPhone:"8 (495) 740-30-77",
     executorExtension:"",
@@ -713,6 +727,7 @@ function resetDocument(type) {
   formFields.forEach(id => {
     $(`#${id}`).value = defaults[id] ?? "";
   });
+  updateSignatoryPosition();
   columns = defaultColumns.map(column => ({ ...column }));
   rowsData = [{ values:{ quantity:1, unit:"шт." } }];
   localStorage.removeItem(draftStorageKey);
@@ -742,6 +757,7 @@ function load() {
   if (!saved) return false;
   documentType = saved.documentType === "letter" ? "letter" : "proposal";
   formFields.forEach(id => { if (saved.form?.[id] != null) $(`#${id}`).value = saved.form[id]; });
+  updateSignatoryPosition();
   if (Array.isArray(saved.columns) && saved.columns.length) columns = saved.columns;
   const savedTermColumn = columns.find(column => column.role === "termWeeks");
   if (savedTermColumn) {
@@ -765,6 +781,7 @@ function restoreProposal(record) {
   formFields.forEach(id => {
     if (saved.form?.[id] != null) $(`#${id}`).value = saved.form[id];
   });
+  updateSignatoryPosition();
   if (Array.isArray(saved.columns) && saved.columns.length) {
     columns = saved.columns.map(column => ({ ...column }));
   }
@@ -1054,7 +1071,7 @@ function pdfDocumentDefinition() {
       columns:[
         { width:"40%", text:$("#signatoryPosition").value || "Генеральный директор", bold:true },
         { width:"20%", text:"________________", alignment:"center", margin:[0,12,0,0] },
-        { width:"40%", text:$("#signatoryName").value || "Батурина Татьяна Алексеевна", bold:true, alignment:"right", margin:[0,12,0,0] }
+        { width:"40%", text:$("#signatoryName").value || "Батурина Т.А.", bold:true, alignment:"right", margin:[0,12,0,0] }
       ]
     }
   );
@@ -1390,7 +1407,7 @@ function generateProposal() {
     <div class="signature">
       <div><b>${safe($("#signatoryPosition").value || "Генеральный директор")}</b></div>
       <div class="signature-line">________________</div>
-      <div class="signature-name">${safe($("#signatoryName").value || "Батурина Татьяна Алексеевна")}</div>
+      <div class="signature-name">${safe($("#signatoryName").value || "Батурина Т.А.")}</div>
     </div>
     ${executorContactHtml() ? `<div class="executor-contact">${executorContactHtml()}</div>` : ""}`;
   showTab("proposal");
@@ -1490,6 +1507,7 @@ $$(".tab").forEach(button => button.addEventListener("click", () => {
 }));
 formFields.forEach(id => $(`#${id}`).addEventListener("input", updateSummary));
 $("#recipientName").addEventListener("input", updateGreetingPlaceholder);
+$("#signatoryName").addEventListener("input", updateSignatoryPosition);
 $("#executorName").addEventListener("change", updateExecutorExtension);
 $("#recipientDatabaseSelect").addEventListener("change", fillRecipientFromDatabase);
 $("#deleteRecipientButton").addEventListener("click", deleteSelectedRecipient);

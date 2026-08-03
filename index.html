@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Паспорт закупки и коммерческое предложение</title>
-  <link rel="stylesheet" href="styles.css?v=20260803-1">
+  <link rel="stylesheet" href="styles.css?v=20260803-2">
 </head>
 <body>
   <section class="auth-screen" id="authScreen" hidden>
@@ -108,7 +108,13 @@
               </div>
               <div class="form-grid">
                 <label>Должность подписанта<input id="signatoryPosition" value="Генеральный директор"></label>
-                <label>ФИО подписанта<input id="signatoryName" value="Батурина Татьяна Алексеевна"></label>
+                <label>ФИО подписанта
+                  <input id="signatoryName" list="signatoryNames" value="Батурина Т.А.">
+                  <datalist id="signatoryNames">
+                    <option value="Батурина Т.А.">Генеральный директор</option>
+                    <option value="Скребнев А.В.">Технический директор</option>
+                  </datalist>
+                </label>
               </div>
             </section>
             <section class="details-section details-section-wide">
@@ -269,6 +275,6 @@
   <script src="assets/html2canvas.min.js"></script>
   <script src="assets/supabase.js"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js?v=20260803-1"></script>
+  <script src="app.js?v=20260803-2"></script>
 </body>
 </html>
