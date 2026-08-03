@@ -156,7 +156,7 @@ td textarea { width:210px; }
 .proposal-free-text .free-text-spacer { min-height:7px; margin:0; text-indent:0; }
 .proposal-free-text-after { margin-top:16px; }
 .proposal-table { width:100%; table-layout:fixed; font-size:11.5px; line-height:1.4; }
-.proposal-table th { position:static; min-height:36px; color:white; background:#5d6470; font-size:10.5px; font-weight:700; letter-spacing:.005em; vertical-align:middle; line-height:1.34; white-space:normal; overflow-wrap:normal; word-break:normal; hyphens:none; }
+.proposal-table th { position:static; min-height:36px; color:white; background:#5d6470; font-size:10.5px; font-weight:700; letter-spacing:.005em; text-align:center; vertical-align:middle; line-height:1.25; white-space:normal; overflow-wrap:break-word; word-break:normal; hyphens:none; text-wrap:balance; }
 .proposal-table th,.proposal-table td { padding:7px 5px; word-break:normal; }
 .proposal-table td { overflow-wrap:break-word; }
 .proposal-table th:first-child,.proposal-table td:first-child { text-align:center; }

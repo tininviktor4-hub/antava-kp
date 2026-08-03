@@ -1045,7 +1045,7 @@ function pdfDocumentDefinition() {
     content.push({
       table:{
         headerRows:1,
-        widths:["auto", ...proposalColumns.map(() => "*")],
+        widths:proposalPdfColumnWidths(proposalColumns, landscape),
         body:tableBody
       },
       layout:{
@@ -1319,17 +1319,20 @@ function updateExecutorExtension() {
 
 function proposalColumnWeight(column) {
   const roleWeights = {
-    supplyName: 2.7,
-    requestName: 2.7,
-    manufacturer: 1.5,
+    supplyName: 3.3,
+    requestName: 3.3,
+    manufacturer: 1.8,
     comment: 2.2,
     quantity: 1.15,
-    unit: 0.8,
-    salePrice: 1.75,
-    saleTotal: 1.75,
-    termWeeks: 1.4
+    unit: 0.85,
+    salePrice: 2.2,
+    saleTotal: 2.2,
+    termWeeks: 1.55
   };
-  return roleWeights[column.role] || (column.type === "text" ? 1.7 : 1.15);
+  if (roleWeights[column.role]) return roleWeights[column.role];
+  const labelLength = String(column.label || "").trim().length;
+  const automaticWeight = 1.05 + Math.min(1.65, labelLength / 18);
+  return column.type === "text" ? Math.max(1.65, automaticWeight) : Math.max(1.15, automaticWeight);
 }
 
 function proposalCellClass(column) {
@@ -1339,9 +1342,16 @@ function proposalCellClass(column) {
 }
 
 function proposalColgroup(proposalColumns) {
-  const weights = [0.45, ...proposalColumns.map(proposalColumnWeight)];
+  const weights = [0.5, ...proposalColumns.map(proposalColumnWeight)];
   const total = weights.reduce((sum, weight) => sum + weight, 0);
   return `<colgroup>${weights.map(weight => `<col style="width:${(weight / total * 100).toFixed(3)}%">`).join("")}</colgroup>`;
+}
+
+function proposalPdfColumnWidths(proposalColumns, landscape) {
+  const availableWidth = landscape ? 773.89 : 527.28;
+  const weights = [0.5, ...proposalColumns.map(proposalColumnWeight)];
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  return weights.map(weight => Number((availableWidth * weight / total).toFixed(2)));
 }
 
 function applyProposalPageLayout(landscape) {
