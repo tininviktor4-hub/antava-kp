@@ -28,11 +28,16 @@ const signatoryPositions = {
 
 function updateSignatoryPosition() {
   const nameField = $("#signatoryName");
-  if (nameField.value.trim() === "Батурина Татьяна Алексеевна") {
-    nameField.value = "Батурина Т.А.";
-  }
   const position = signatoryPositions[nameField.value.trim()];
   if (position) $("#signatoryPosition").value = position;
+}
+
+function restoreSignatorySelection(savedName) {
+  const normalizedName = savedName === "Батурина Татьяна Алексеевна"
+    ? "Батурина Т.А."
+    : savedName;
+  $("#signatoryName").value = signatoryPositions[normalizedName] ? normalizedName : "Батурина Т.А.";
+  updateSignatoryPosition();
 }
 
 const defaultColumns = [
@@ -757,7 +762,7 @@ function load() {
   if (!saved) return false;
   documentType = saved.documentType === "letter" ? "letter" : "proposal";
   formFields.forEach(id => { if (saved.form?.[id] != null) $(`#${id}`).value = saved.form[id]; });
-  updateSignatoryPosition();
+  restoreSignatorySelection(saved.form?.signatoryName);
   if (Array.isArray(saved.columns) && saved.columns.length) columns = saved.columns;
   const savedTermColumn = columns.find(column => column.role === "termWeeks");
   if (savedTermColumn) {
@@ -781,7 +786,7 @@ function restoreProposal(record) {
   formFields.forEach(id => {
     if (saved.form?.[id] != null) $(`#${id}`).value = saved.form[id];
   });
-  updateSignatoryPosition();
+  restoreSignatorySelection(saved.form?.signatoryName);
   if (Array.isArray(saved.columns) && saved.columns.length) {
     columns = saved.columns.map(column => ({ ...column }));
   }
@@ -1507,7 +1512,7 @@ $$(".tab").forEach(button => button.addEventListener("click", () => {
 }));
 formFields.forEach(id => $(`#${id}`).addEventListener("input", updateSummary));
 $("#recipientName").addEventListener("input", updateGreetingPlaceholder);
-$("#signatoryName").addEventListener("input", updateSignatoryPosition);
+$("#signatoryName").addEventListener("change", updateSignatoryPosition);
 $("#executorName").addEventListener("change", updateExecutorExtension);
 $("#recipientDatabaseSelect").addEventListener("change", fillRecipientFromDatabase);
 $("#deleteRecipientButton").addEventListener("click", deleteSelectedRecipient);
