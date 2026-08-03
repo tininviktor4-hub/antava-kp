@@ -1104,7 +1104,7 @@ async function proposalPdfBlob() {
   const sliceHeight = Math.max(1, Math.floor(canvas.width * pageHeight / pageWidth));
   const pages = [];
   const heightOverflow = canvas.height / sliceHeight;
-  if (heightOverflow <= 1.2) {
+  if (heightOverflow <= 1.02) {
     const scale = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
     const fittedWidth = canvas.width * scale;
     const fittedHeight = canvas.height * scale;
