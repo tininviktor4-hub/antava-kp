@@ -1093,6 +1093,55 @@ function pdfDocumentDefinition() {
   };
 }
 
+function proposalPageBreakCandidates(documentElement, canvas) {
+  const rootRect = documentElement.getBoundingClientRect();
+  const scaleY = canvas.height / Math.max(1, documentElement.scrollHeight);
+  const selectors = [
+    ".proposal-table thead",
+    ".proposal-table tbody tr",
+    ".proposal-total",
+    ".proposal-free-text",
+    ".proposal-free-text > p",
+    ".proposal-free-text > div",
+    ".proposal-free-text > ul",
+    ".proposal-free-text > ol",
+    ".proposal-terms",
+    ".signature",
+    ".executor-contact"
+  ];
+  const points = [0, canvas.height];
+  $$(selectors.join(","), documentElement).forEach(element => {
+    const rect = element.getBoundingClientRect();
+    const top = Math.round((rect.top - rootRect.top) * scaleY);
+    const bottom = Math.round((rect.bottom - rootRect.top) * scaleY);
+    if (top > 0 && top < canvas.height) points.push(top);
+    if (bottom > 0 && bottom < canvas.height) points.push(bottom);
+  });
+  return [...new Set(points)].sort((a, b) => a - b);
+}
+
+function proposalPageSlices(canvasHeight, maximumSliceHeight, breakCandidates) {
+  const slices = [];
+  let top = 0;
+  while (top < canvasHeight) {
+    const remaining = canvasHeight - top;
+    if (remaining <= maximumSliceHeight) {
+      slices.push({ top, height:remaining });
+      break;
+    }
+    const targetBottom = top + maximumSliceHeight;
+    const minimumBottom = top + maximumSliceHeight * 0.35;
+    const safetyGap = Math.max(12, Math.round(maximumSliceHeight * 0.01));
+    const safeBottom = breakCandidates
+      .filter(point => point >= minimumBottom && point <= targetBottom - safetyGap)
+      .at(-1);
+    const bottom = safeBottom && safeBottom > top ? safeBottom : targetBottom;
+    slices.push({ top, height:bottom - top });
+    top = bottom;
+  }
+  return slices;
+}
+
 async function proposalPdfBlob() {
   generateProposal();
   if (!window.pdfMake || !window.html2canvas) throw new Error("PDF modules are unavailable");
@@ -1137,22 +1186,23 @@ async function proposalPdfBlob() {
       margin:[(pageWidth - fittedWidth) / 2, (pageHeight - fittedHeight) / 2, 0, 0]
     });
   } else {
-    for (let top = 0; top < canvas.height; top += sliceHeight) {
-      const partHeight = Math.min(sliceHeight, canvas.height - top);
+    const breakCandidates = proposalPageBreakCandidates(documentElement, canvas);
+    const slices = proposalPageSlices(canvas.height, sliceHeight, breakCandidates);
+    slices.forEach(slice => {
       const pageCanvas = document.createElement("canvas");
       pageCanvas.width = canvas.width;
       pageCanvas.height = sliceHeight;
       const context = pageCanvas.getContext("2d");
       context.fillStyle = "#ffffff";
       context.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-      context.drawImage(canvas, 0, top, canvas.width, partHeight, 0, 0, canvas.width, partHeight);
+      context.drawImage(canvas, 0, slice.top, canvas.width, slice.height, 0, 0, canvas.width, slice.height);
       pages.push({
         image:pageCanvas.toDataURL("image/png"),
         width:pageWidth,
         height:pageHeight,
         margin:[0,0,0,0]
       });
-    }
+    });
   }
   const definition = {
     pageSize:"A4",

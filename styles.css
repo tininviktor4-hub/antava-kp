@@ -161,6 +161,8 @@ td textarea { width:210px; }
 .proposal-table td { overflow-wrap:break-word; }
 .proposal-table th:first-child,.proposal-table td:first-child { text-align:center; }
 .proposal-table td { border-bottom:1px solid #d7dbe0; }
+.proposal-table tr,.proposal-total,.proposal-terms,.signature,.executor-contact { break-inside:avoid; page-break-inside:avoid; }
+.proposal-free-text > p,.proposal-free-text > div,.proposal-free-text > ul,.proposal-free-text > ol { break-inside:avoid; page-break-inside:avoid; }
 .proposal-table .num { text-align:right; white-space:normal; }
 .proposal-table .center { text-align:center; }
 .proposal-table-compact { font-size:10.2px; line-height:1.32; }
