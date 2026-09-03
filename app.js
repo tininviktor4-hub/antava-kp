@@ -54,7 +54,7 @@ const defaultColumns = [
 
 let columns = defaultColumns.map(column => ({ ...column }));
 let rowsData = [{ values: { quantity: 1, unit: "шт." } }];
-let documentType = "proposal";
+let documentType = "letter";
 
 function numeric(value) {
   return Number(String(value ?? "").replace(/\s/g, "").replace(",", ".")) || 0;
@@ -747,10 +747,6 @@ function resetDocument(type) {
   updateGreetingPlaceholder();
   applyDocumentTypeUI();
   showTab("calculation");
-}
-
-function newProposal() {
-  resetDocument("proposal");
 }
 
 function newLetter() {
@@ -1551,7 +1547,6 @@ $("#columnsButton").addEventListener("click", () => {
 });
 $("#addColumnButton").addEventListener("click", addColumn);
 $("#saveButton").addEventListener("click", save);
-$("#newProposalButton").addEventListener("click", newProposal);
 $("#newLetterButton").addEventListener("click", newLetter);
 $("#signInButton").addEventListener("click", signIn);
 $("#signOutButton").addEventListener("click", signOut);

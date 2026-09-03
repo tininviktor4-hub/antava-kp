@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Паспорт закупки и коммерческое предложение</title>
-  <link rel="stylesheet" href="styles.css?v=20260807-1">
+  <title>Конструктор писем АНТАВА</title>
+  <link rel="stylesheet" href="styles.css?v=20260903-1">
 </head>
 <body>
   <section class="auth-screen" id="authScreen" hidden>
@@ -28,15 +28,14 @@
         <img class="app-logo" src="assets/antava-logo.png" alt="АНТАВА">
       </div>
       <div>
-        <p class="eyebrow">Подготовка коммерческого предложения</p>
-        <h1>Конструктор КП</h1>
-        <p class="muted">Заполните позиции заявки и сформируйте готовое предложение по шаблону.</p>
+        <p class="eyebrow">Подготовка исходящих документов</p>
+        <h1>Конструктор писем</h1>
+        <p class="muted">Заполните данные и сформируйте готовое письмо по шаблону.</p>
       </div>
     </div>
     <div class="header-actions">
       <span class="cloud-user" id="cloudUser" hidden></span>
       <button class="button button-ghost" id="signOutButton" hidden>Выйти</button>
-      <button class="button button-ghost" id="newProposalButton">+ Новое КП</button>
       <button class="button button-ghost" id="newLetterButton">+ Новое письмо</button>
       <button class="button button-ghost" id="saveButton">Сохранить в историю</button>
       <button class="button button-ghost" id="excelButton">Сохранить в Excel</button>
@@ -45,7 +44,7 @@
 
   <main class="app-shell">
     <nav class="tabs" aria-label="Разделы программы">
-      <button class="tab active" data-tab="calculation">Позиции заявки</button>
+      <button class="tab active" data-tab="calculation">Данные письма</button>
       <button class="tab" data-tab="proposal">Предварительный просмотр</button>
       <button class="tab" data-tab="history">История</button>
     </nav>
@@ -53,8 +52,8 @@
     <section id="calculation" class="tab-panel active">
       <div class="settings-grid single-settings">
         <article class="card">
-          <p class="eyebrow">Реквизиты предложения</p>
-          <h2 id="detailsTitle">Данные коммерческого предложения</h2>
+          <p class="eyebrow">Реквизиты документа</p>
+          <h2 id="detailsTitle">Данные письма</h2>
           <div class="details-sections">
             <section class="details-section">
               <div class="details-section-heading">
@@ -86,8 +85,8 @@
                 <div><h3>Документ</h3><p>Номер, дата и связь с запросом заказчика</p></div>
               </div>
               <div class="form-grid">
-                <label><span id="documentDateLabel">Дата КП</span><input id="proposalDate" type="date"></label>
-                <label>Исходящий номер<input id="proposalNumber" value="КП-001"></label>
+                <label><span id="documentDateLabel">Дата письма</span><input id="proposalDate" type="date"></label>
+                <label>Исходящий номер<input id="proposalNumber" value="ИСХ-001"></label>
                 <label>В ответ на №<input id="replyNumber" placeholder="Необязательно"></label>
                 <label>Дата входящего письма<input id="replyDate" type="date"></label>
               </div>
@@ -274,6 +273,6 @@
   <script src="assets/html2canvas.min.js"></script>
   <script src="assets/supabase.js"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js?v=20260807-1"></script>
+  <script src="app.js?v=20260903-1"></script>
 </body>
 </html>
