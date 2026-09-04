@@ -822,9 +822,7 @@ function renderHistory() {
       record.number || "Без номера",
       record.proposalDate ? formatDocumentDate(record.proposalDate) : "—",
       record.customer || "Заказчик не указан",
-      record.executorName || record.state?.form?.executorName || "Не выбран",
-      isLetter ? "—" : money.format(numeric(record.grandTotal)),
-      isLetter ? "—" : String(record.itemCount ?? 0)
+      record.executorName || record.state?.form?.executorName || "Не выбран"
     ].forEach(value => {
       const cell = document.createElement("td");
       cell.textContent = value;
